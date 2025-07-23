@@ -5,10 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Employee NPS Survey</title>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -168,19 +164,7 @@
   </div>
 
   <script>
-    // Replace this with your Firebase config
-    const firebaseConfig = {
-      apiKey: "YOUR-API-KEY",
-      authDomain: "YOUR-PROJECT.firebaseapp.com",
-      projectId: "YOUR-PROJECT-ID",
-      storageBucket: "YOUR-PROJECT.appspot.com",
-      messagingSenderId: "YOUR-SENDER-ID",
-      appId: "YOUR-APP-ID"
-    };
-
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const phpURL = "send-email.php"; // PHP script to handle the email
 
     // Create scale buttons
     const npsScale = document.getElementById('npsScale');
@@ -211,20 +195,31 @@
         return;
       }
 
+      const payload = {
+        businessName: businessName,
+        score: selectedScore,
+        confirmation: confirmation ? "Yes" : "No"
+      };
+
       try {
-        await db.collection("npsResponses").add({
-          businessName: businessName,
-          score: selectedScore,
-          confirmation: confirmation,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        const response = await fetch(phpURL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         });
-        document.getElementById('successMessage').textContent = "✅ Thank you for your feedback!";
-        this.reset();
-        document.querySelectorAll('.nps-button').forEach(btn => btn.classList.remove('selected'));
-        selectedScore = null;
+        const result = await response.json();
+
+        if (result.result === "success") {
+          document.getElementById('successMessage').textContent = "✅ Thank you for your feedback!";
+          this.reset();
+          document.querySelectorAll('.nps-button').forEach(btn => btn.classList.remove('selected'));
+          selectedScore = null;
+        } else {
+          throw new Error(result.message);
+        }
       } catch (error) {
-        console.error("Error saving response:", error);
-        alert("❌ Failed to save response. Please try again later.");
+        console.error("Error:", error);
+        alert("❌ Could not send your response. Please try again later.");
       }
     });
   </script>
