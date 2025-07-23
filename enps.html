@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Employee NPS Survey</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .survey-container {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+    .survey-container h2 {
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .scale-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+    }
+    .scale-buttons button {
+      flex: 1;
+      margin: 2px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      background: #f9f9f9;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .scale-buttons button.selected {
+      background: #007BFF;
+      color: white;
+      border-color: #007BFF;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 10px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .submit-btn:hover {
+      background: #218838;
+    }
+    .success-message {
+      text-align: center;
+      color: green;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="survey-container">
+    <h2>Employee NPS Survey</h2>
+    <form id="npsForm">
+      <div class="form-group">
+        <label for="businessName">Business Name:</label>
+        <input type="text" id="businessName" required>
+      </div>
+      <div class="form-group">
+        <label>On a scale of 0–10, how likely are you to recommend our company as a place to work?</label>
+        <div class="scale-buttons" id="scaleButtons">
+          <!-- Buttons will be added by JS -->
+        </div>
+      </div>
+      <div class="form-group">
+        <input type="checkbox" id="confirmation" required>
+        <label for="confirmation">I confirm I work for this business and am scoring honestly</label>
+      </div>
+      <button type="submit" class="submit-btn">Submit</button>
+      <div id="successMessage" class="success-message"></div>
+    </form>
+  </div>
+
+  <script>
+    // Dynamically create scale buttons 0–10
+    const scaleButtons = document.getElementById('scaleButtons');
+    let selectedScore = null;
+
+    for (let i = 0; i <= 10; i++) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = i;
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.scale-buttons button').forEach(btn => btn.classList.remove('selected'));
+        button.classList.add('selected');
+        selectedScore = i;
+      });
+      scaleButtons.appendChild(button);
+    }
+
+    // Handle form submission
+    document.getElementById('npsForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const businessName = document.getElementById('businessName').value.trim();
+      const confirmation = document.getElementById('confirmation').checked;
+
+      if (!businessName || selectedScore === null || !confirmation) {
+        alert('Please complete all fields before submitting.');
+        return;
+      }
+
+      // Example: Logging to console (replace with AJAX call to server in production)
+      console.log({
+        businessName: businessName,
+        score: selectedScore,
+        confirmation: confirmation
+      });
+
+      // Show success message
+      document.getElementById('successMessage').textContent = 'Thank you for your feedback!';
+      document.getElementById('npsForm').reset();
+      document.querySelectorAll('.scale-buttons button').forEach(btn => btn.classList.remove('selected'));
+      selectedScore = null;
+    });
+  </script>
+</body>
+</html>
