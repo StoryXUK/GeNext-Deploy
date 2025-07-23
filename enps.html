@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Employee NPS Survey</title>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -40,7 +45,7 @@
       font-weight: 600;
       margin-bottom: 8px;
       color: #444;
-      font-size: 1rem; /* At least 16px */
+      font-size: 1rem;
     }
 
     input[type="text"] {
@@ -48,7 +53,7 @@
       padding: 12px;
       border: 1px solid #ccc;
       border-radius: 6px;
-      font-size: 1rem; /* At least 16px */
+      font-size: 1rem;
     }
 
     .nps-scale {
@@ -64,7 +69,7 @@
       margin: 2px;
       border: none;
       border-radius: 5px;
-      font-size: 1rem; /* At least 16px */
+      font-size: 1rem;
       padding: 12px 0;
       cursor: pointer;
       color: #fff;
@@ -80,7 +85,7 @@
       transform: scale(1.1);
     }
 
-    /* Gradient colors: red for 0-6, yellow for 7-8, green for 9-10 */
+    /* NPS colors */
     .nps-button[data-score="0"],
     .nps-button[data-score="1"],
     .nps-button[data-score="2"],
@@ -106,7 +111,7 @@
       display: flex;
       align-items: center;
       margin-bottom: 15px;
-      font-size: 1rem; /* At least 16px */
+      font-size: 1rem;
     }
 
     .confirmation input {
@@ -118,7 +123,7 @@
     .submit-btn {
       width: 100%;
       padding: 14px;
-      font-size: 1rem; /* At least 16px */
+      font-size: 1rem;
       background: #007bff;
       color: #fff;
       border: none;
@@ -163,10 +168,24 @@
   </div>
 
   <script>
+    // Replace this with your Firebase config
+    const firebaseConfig = {
+      apiKey: "YOUR-API-KEY",
+      authDomain: "YOUR-PROJECT.firebaseapp.com",
+      projectId: "YOUR-PROJECT-ID",
+      storageBucket: "YOUR-PROJECT.appspot.com",
+      messagingSenderId: "YOUR-SENDER-ID",
+      appId: "YOUR-APP-ID"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Create scale buttons
     const npsScale = document.getElementById('npsScale');
     let selectedScore = null;
 
-    // Create 0-10 buttons
     for (let i = 0; i <= 10; i++) {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -182,7 +201,7 @@
     }
 
     // Handle form submission
-    document.getElementById('npsForm').addEventListener('submit', function(event) {
+    document.getElementById('npsForm').addEventListener('submit', async function(event) {
       event.preventDefault();
       const businessName = document.getElementById('businessName').value.trim();
       const confirmation = document.getElementById('confirmation').checked;
@@ -192,19 +211,22 @@
         return;
       }
 
-      console.log({
-        businessName: businessName,
-        score: selectedScore,
-        confirmation: confirmation
-      });
-
-      document.getElementById('successMessage').textContent = "✅ Thank you for your feedback!";
-      this.reset();
-      document.querySelectorAll('.nps-button').forEach(btn => btn.classList.remove('selected'));
-      selectedScore = null;
+      try {
+        await db.collection("npsResponses").add({
+          businessName: businessName,
+          score: selectedScore,
+          confirmation: confirmation,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        document.getElementById('successMessage').textContent = "✅ Thank you for your feedback!";
+        this.reset();
+        document.querySelectorAll('.nps-button').forEach(btn => btn.classList.remove('selected'));
+        selectedScore = null;
+      } catch (error) {
+        console.error("Error saving response:", error);
+        alert("❌ Failed to save response. Please try again later.");
+      }
     });
   </script>
 </body>
 </html>
-
-
