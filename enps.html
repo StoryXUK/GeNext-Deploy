@@ -2,80 +2,140 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Employee NPS Survey</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f9;
+      background: #f7f8fa;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
     }
+
     .survey-container {
-      background: white;
-      padding: 20px 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      max-width: 400px;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
       width: 100%;
     }
+
     .survey-container h2 {
-      margin-bottom: 15px;
       text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
     }
+
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
+
     label {
       display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #444;
+      font-size: 1rem; /* At least 16px */
     }
+
     input[type="text"] {
       width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem; /* At least 16px */
     }
-    .scale-buttons {
+
+    .nps-scale {
       display: flex;
       justify-content: space-between;
-      margin: 10px 0;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
-    .scale-buttons button {
+
+    .nps-button {
       flex: 1;
       margin: 2px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      background: #f9f9f9;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-    .scale-buttons button.selected {
-      background: #007BFF;
-      color: white;
-      border-color: #007BFF;
-    }
-    .submit-btn {
-      width: 100%;
-      padding: 10px;
-      background: #28a745;
-      color: white;
       border: none;
       border-radius: 5px;
-      font-size: 16px;
+      font-size: 1rem; /* At least 16px */
+      padding: 12px 0;
       cursor: pointer;
+      color: #fff;
+      transition: transform 0.1s ease;
     }
+
+    .nps-button:hover {
+      transform: scale(1.05);
+    }
+
+    .nps-button.selected {
+      border: 2px solid #333;
+      transform: scale(1.1);
+    }
+
+    /* Gradient colors: red for 0-6, yellow for 7-8, green for 9-10 */
+    .nps-button[data-score="0"],
+    .nps-button[data-score="1"],
+    .nps-button[data-score="2"],
+    .nps-button[data-score="3"],
+    .nps-button[data-score="4"],
+    .nps-button[data-score="5"],
+    .nps-button[data-score="6"] {
+      background-color: #e74c3c;
+    }
+
+    .nps-button[data-score="7"],
+    .nps-button[data-score="8"] {
+      background-color: #f1c40f;
+      color: #333;
+    }
+
+    .nps-button[data-score="9"],
+    .nps-button[data-score="10"] {
+      background-color: #2ecc71;
+    }
+
+    .confirmation {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      font-size: 1rem; /* At least 16px */
+    }
+
+    .confirmation input {
+      margin-right: 10px;
+      width: 18px;
+      height: 18px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem; /* At least 16px */
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
     .submit-btn:hover {
-      background: #218838;
+      background: #0056b3;
     }
+
     .success-message {
       text-align: center;
       color: green;
-      margin-top: 10px;
+      margin-top: 15px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -89,13 +149,13 @@
       </div>
       <div class="form-group">
         <label>On a scale of 0–10, how likely are you to recommend our company as a place to work?</label>
-        <div class="scale-buttons" id="scaleButtons">
-          <!-- Buttons will be added by JS -->
+        <div class="nps-scale" id="npsScale">
+          <!-- Buttons created by JS -->
         </div>
       </div>
-      <div class="form-group">
+      <div class="confirmation">
         <input type="checkbox" id="confirmation" required>
-        <label for="confirmation">I confirm I work for this business and am scoring honestly</label>
+        <label for="confirmation">I confirm I work for this business and am scoring honestly.</label>
       </div>
       <button type="submit" class="submit-btn">Submit</button>
       <div id="successMessage" class="success-message"></div>
@@ -103,20 +163,22 @@
   </div>
 
   <script>
-    // Dynamically create scale buttons 0–10
-    const scaleButtons = document.getElementById('scaleButtons');
+    const npsScale = document.getElementById('npsScale');
     let selectedScore = null;
 
+    // Create 0-10 buttons
     for (let i = 0; i <= 10; i++) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.textContent = i;
-      button.addEventListener('click', () => {
-        document.querySelectorAll('.scale-buttons button').forEach(btn => btn.classList.remove('selected'));
-        button.classList.add('selected');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = i;
+      btn.classList.add('nps-button');
+      btn.setAttribute('data-score', i);
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.nps-button').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
         selectedScore = i;
       });
-      scaleButtons.appendChild(button);
+      npsScale.appendChild(btn);
     }
 
     // Handle form submission
@@ -130,19 +192,19 @@
         return;
       }
 
-      // Example: Logging to console (replace with AJAX call to server in production)
       console.log({
         businessName: businessName,
         score: selectedScore,
         confirmation: confirmation
       });
 
-      // Show success message
-      document.getElementById('successMessage').textContent = 'Thank you for your feedback!';
-      document.getElementById('npsForm').reset();
-      document.querySelectorAll('.scale-buttons button').forEach(btn => btn.classList.remove('selected'));
+      document.getElementById('successMessage').textContent = "✅ Thank you for your feedback!";
+      this.reset();
+      document.querySelectorAll('.nps-button').forEach(btn => btn.classList.remove('selected'));
       selectedScore = null;
     });
   </script>
 </body>
 </html>
+
+
