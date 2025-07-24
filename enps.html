@@ -119,6 +119,12 @@
       margin-top: 15px;
       font-weight: bold;
     }
+    #loadingSpinner {
+      display: none;
+      text-align: center;
+      margin-top: 15px;
+      color: #444;
+    }
   </style>
 </head>
 <body>
@@ -138,14 +144,15 @@
         <label for="confirmation">I confirm I work for this business and am scoring honestly.</label>
       </div>
       <button type="submit" class="submit-btn">Submit</button>
+      <div id="loadingSpinner">⏳ Submitting your feedback...</div>
       <div id="successMessage" class="success-message"></div>
     </form>
   </div>
 
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbxFe9YblP7Wm7-S5nhQOzgUIkcdOuOV-n5Zijo8uYVUNbDTVYo-JG2nUsF8Rk6EDDiX/exec";
-
+    const scriptURL = "https://script.google.com/macros/s/AKfycbx7HXnAOqiTqlKS18LlKlIVcpfrHs7OGXrXyz_ODtXD70TQOaWVTydv7xdgX4R2akM/exec";
     const npsScale = document.getElementById('npsScale');
+    const submitBtn = document.querySelector('.submit-btn');
     let selectedScore = null;
 
     for (let i = 0; i <= 10; i++) {
@@ -164,6 +171,7 @@
 
     document.getElementById('npsForm').addEventListener('submit', async function(event) {
       event.preventDefault();
+
       const businessName = document.getElementById('businessName').value.trim();
       const confirmation = document.getElementById('confirmation').checked;
 
@@ -172,22 +180,25 @@
         return;
       }
 
-      const payload = {
-        businessName: businessName,
-        score: selectedScore,
-        confirmation: confirmation ? "Yes" : "No"
-      };
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+      document.getElementById('loadingSpinner').style.display = 'block';
+      document.getElementById('successMessage').textContent = "";
+
+      const formData = new FormData();
+      formData.append("businessName", businessName);
+      formData.append("score", selectedScore);
+      formData.append("confirmation", confirmation ? "Yes" : "No");
 
       try {
         const response = await fetch(scriptURL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: formData
         });
         const result = await response.json();
 
         if (result.result === "success") {
-          document.getElementById('successMessage').textContent = "✅ Thank you for your feedback!";
+          window.location.href = "thank-you.html";
           this.reset();
           document.querySelectorAll('.nps-button').forEach(btn => btn.classList.remove('selected'));
           selectedScore = null;
@@ -195,8 +206,11 @@
           throw new Error(result.message);
         }
       } catch (error) {
-        console.error("Error:", error);
         alert("❌ Could not send your response. Please try again later.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit";
+        document.getElementById('loadingSpinner').style.display = 'none';
       }
     });
   </script>
