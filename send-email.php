@@ -8,7 +8,7 @@ $score = intval($data['score']);
 $confirmation = htmlspecialchars($data['confirmation']);
 
 // Email settings
-$to = "vandy@genext.io";
+$to = "james@story-x.co.uk";
 $subject = "New Employee NPS Response";
 $headers = "From: noreply@genext.io\r\n";
 $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";

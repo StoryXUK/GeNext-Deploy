@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Employee NPS Survey</title>
-
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -15,7 +14,6 @@
       height: 100vh;
       margin: 0;
     }
-
     .survey-container {
       background: #fff;
       padding: 30px;
@@ -24,18 +22,15 @@
       max-width: 500px;
       width: 100%;
     }
-
     .survey-container h2 {
       text-align: center;
       color: #333;
       margin-bottom: 20px;
       font-size: 1.5rem;
     }
-
     .form-group {
       margin-bottom: 20px;
     }
-
     label {
       display: block;
       font-weight: 600;
@@ -43,7 +38,6 @@
       color: #444;
       font-size: 1rem;
     }
-
     input[type="text"] {
       width: 100%;
       padding: 12px;
@@ -51,7 +45,6 @@
       border-radius: 6px;
       font-size: 1rem;
     }
-
     .nps-scale {
       display: flex;
       justify-content: space-between;
@@ -59,7 +52,6 @@
       margin-bottom: 20px;
       flex-wrap: wrap;
     }
-
     .nps-button {
       flex: 1;
       margin: 2px;
@@ -71,17 +63,13 @@
       color: #fff;
       transition: transform 0.1s ease;
     }
-
     .nps-button:hover {
       transform: scale(1.05);
     }
-
     .nps-button.selected {
       border: 2px solid #333;
       transform: scale(1.1);
     }
-
-    /* NPS colors */
     .nps-button[data-score="0"],
     .nps-button[data-score="1"],
     .nps-button[data-score="2"],
@@ -91,31 +79,26 @@
     .nps-button[data-score="6"] {
       background-color: #e74c3c;
     }
-
     .nps-button[data-score="7"],
     .nps-button[data-score="8"] {
       background-color: #f1c40f;
       color: #333;
     }
-
     .nps-button[data-score="9"],
     .nps-button[data-score="10"] {
       background-color: #2ecc71;
     }
-
     .confirmation {
       display: flex;
       align-items: center;
       margin-bottom: 15px;
       font-size: 1rem;
     }
-
     .confirmation input {
       margin-right: 10px;
       width: 18px;
       height: 18px;
     }
-
     .submit-btn {
       width: 100%;
       padding: 14px;
@@ -127,11 +110,9 @@
       cursor: pointer;
       transition: background 0.3s ease;
     }
-
     .submit-btn:hover {
       background: #0056b3;
     }
-
     .success-message {
       text-align: center;
       color: green;
@@ -150,9 +131,7 @@
       </div>
       <div class="form-group">
         <label>On a scale of 0–10, how likely are you to recommend our company as a place to work?</label>
-        <div class="nps-scale" id="npsScale">
-          <!-- Buttons created by JS -->
-        </div>
+        <div class="nps-scale" id="npsScale"></div>
       </div>
       <div class="confirmation">
         <input type="checkbox" id="confirmation" required>
@@ -164,9 +143,8 @@
   </div>
 
   <script>
-    const phpURL = "send-email.php"; // PHP script to handle the email
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxFe9YblP7Wm7-S5nhQOzgUIkcdOuOV-n5Zijo8uYVUNbDTVYo-JG2nUsF8Rk6EDDiX/exec";
 
-    // Create scale buttons
     const npsScale = document.getElementById('npsScale');
     let selectedScore = null;
 
@@ -184,7 +162,6 @@
       npsScale.appendChild(btn);
     }
 
-    // Handle form submission
     document.getElementById('npsForm').addEventListener('submit', async function(event) {
       event.preventDefault();
       const businessName = document.getElementById('businessName').value.trim();
@@ -202,7 +179,7 @@
       };
 
       try {
-        const response = await fetch(phpURL, {
+        const response = await fetch(scriptURL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
